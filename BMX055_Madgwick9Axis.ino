@@ -42,14 +42,15 @@ void setup()
   //BMX055 初期化
   BMX055_Init();
   delay(300);
-  filter.begin(50);
+  filter.begin(20);
 }
 
 void loop()
 {
-  Serial.println("--------------------------------------"); 
+  //Serial.println("--------------------------------------"); 
 
   //BMX055 加速度の読み取り
+  /*
   BMX055_Accl();
   Serial.print("Accl= ");
   Serial.print(xAccl);
@@ -68,18 +69,18 @@ void loop()
   Serial.print(",");
   Serial.print(zGyro);
   Serial.println(""); 
-  
+  */
   //BMX055 磁気の読み取り
   BMX055_Mag();
-  Serial.print("Mag= ");
+  //Serial.print("Mag= ");
   Serial.print(xMag);
   Serial.print(",");
   Serial.print(yMag);
   Serial.print(",");
   Serial.print(zMag);
   Serial.println(""); 
-
-  filter.update(xGyro,yGyro,zGyro,xAccl,yAccl,zAccl,xMag,yMag,zMag);
+  /*
+  filter.updateIMU(xGyro,yGyro,zGyro,xAccl,yAccl,zAccl,xMag,yMag,zMag);
   roll = filter.getRoll();
   pitch = filter.getPitch();
   heading = filter.getYaw();
@@ -89,7 +90,8 @@ void loop()
   Serial.print(pitch);
   Serial.print(" ");
   Serial.println(roll);
-  delay(20);
+  */
+  delay(100);
 }
 
 //=====================================================================================//
@@ -147,6 +149,7 @@ void BMX055_Init()
   Wire.beginTransmission(Addr_Mag);
   Wire.write(0x4C);  // Select Mag register
   Wire.write(0x00);  // Normal Mode, ODR = 10 Hz
+  //Wire.write(0b00000101); // Normal Mode, ODR = 20 Hz
   Wire.endTransmission();
  //------------------------------------------------------------//
   Wire.beginTransmission(Addr_Mag);

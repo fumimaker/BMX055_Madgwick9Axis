@@ -1,5 +1,6 @@
 {
     "port": "/dev/cu.usbserial-A7043P8Y",
     "board": "arduino:avr:pro",
-    "configuration": "cpu=16MHzatmega328"
+    "configuration": "cpu=16MHzatmega328",
+    "sketch": "BMX055_Madgwick9Axis.ino"
 }
