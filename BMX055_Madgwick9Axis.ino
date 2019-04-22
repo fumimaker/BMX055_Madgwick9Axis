@@ -74,11 +74,14 @@ void loop()
   BMX055_Mag();
   //Serial.print("Mag= ");
   Serial.print(xMag);
+  
   Serial.print(",");
-  Serial.print(yMag);
-  Serial.print(",");
-  Serial.print(zMag);
-  Serial.println(""); 
+  Serial.println(yMag);
+  
+  //Serial.print(",");
+  //Serial.print(zMag);
+  //Serial.println(""); 
+  
   /*
   filter.updateIMU(xGyro,yGyro,zGyro,xAccl,yAccl,zAccl,xMag,yMag,zMag);
   roll = filter.getRoll();
@@ -149,7 +152,7 @@ void BMX055_Init()
   Wire.beginTransmission(Addr_Mag);
   Wire.write(0x4C);  // Select Mag register
   Wire.write(0x00);  // Normal Mode, ODR = 10 Hz
-  //Wire.write(0b00000101); // Normal Mode, ODR = 20 Hz
+  //Wire.write(0b10100000); // Normal Mode, ODR = 20 Hz
   Wire.endTransmission();
  //------------------------------------------------------------//
   Wire.beginTransmission(Addr_Mag);
