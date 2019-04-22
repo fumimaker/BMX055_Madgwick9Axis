@@ -1,0 +1,5 @@
+{
+    "port": "/dev/cu.usbserial-A7043P8Y",
+    "board": "arduino:avr:pro",
+    "configuration": "cpu=16MHzatmega328"
+}
