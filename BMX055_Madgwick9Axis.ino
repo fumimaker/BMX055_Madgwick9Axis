@@ -19,6 +19,11 @@
 // BMX055　磁気センサのI2Cアドレス
 #define Addr_Mag 0x13   // (JP1,JP2,JP3 = Openの時)
 #define address 0x1E    //0011110b, I2C 7bit address of HMC5883
+// デバイスアドレス(スレーブ)
+uint8_t DEVICE_ADDRESS = 0x5C; // 2進 1011100
+
+// テスト用レジスタの結果
+bool WHO_AM_I = false;
 
 // センサーの値を保存するグローバル関数
 float xAccl = 0.00;
@@ -43,6 +48,8 @@ void setup()
   //BMX055 初期化
   BMX055_Init();
   delay(300);
+  LPS25H_init();
+  delay(100);
   filter.begin(50);
 }
 
@@ -94,6 +101,53 @@ void loop()
   Serial.print(pitch);
   Serial.print(" ");
   Serial.println(roll);
+
+
+
+  int i;
+  uint8_t RegTbl[5];
+
+  // デバイスから1byte毎にレジスタを読み込む
+  // ※このデバイスは複数バイトをまとめて取得できないらしい　hamatta(-;
+  for (i = 0; i < 5; i++)
+  {
+    Wire.beginTransmission(DEVICE_ADDRESS);
+    Wire.write(0x28 + i);
+    Wire.endTransmission();
+
+    // デバイスへ1byteのレジスタデータを要求する
+    Wire.requestFrom(DEVICE_ADDRESS, 1);
+    while (Wire.available() == 0)
+    {
+    }
+    RegTbl[i] = Wire.read();
+  }
+
+  // --- [気圧] ---
+  // 読み取った「3byte」を24bitに変換する
+  // ※UNOは16bitを超えるシフトはできませんので、乗算で対処しています。 hamatta(-;
+  uint16_t lo = RegTbl[1] << 8 | RegTbl[0];
+  uint32_t hi = RegTbl[2] * 65536; // 16bitの左シフト
+  float P = (hi + lo) / 4096.0;
+
+  Serial.print("pressure: ");
+  Serial.print(P);
+  Serial.print("hPa(mbar)");
+
+  // --- [温度] ---
+  // 温度は符号ありのデータ型でOK
+  int temperature = (RegTbl[4] << 8 | RegTbl[3]);
+  float T = 42.5 + (temperature / 480.0);
+  Serial.print(" temp : ");
+  Serial.print(T);
+  Serial.print(" degree");
+
+  // --- [標高] ---
+  float H = ((pow(1013.25 / P, 1 / 5.257) - 1) * (T + 273.15)) / 0.0065;
+  Serial.print(" height: ");
+  Serial.print(H);
+  Serial.println("m");
+
   delay(20);
 }
 
@@ -244,4 +298,36 @@ void BMX055_Mag()
   if (yMag > 4095)  yMag -= 8192;
   zMag = ((data[5] <<8) | (data[4]>>3));
   if (zMag > 16383)  zMag -= 32768;
+}
+
+void LPS25H_init(){
+  Wire.beginTransmission(DEVICE_ADDRESS);
+  Wire.write(0x0F);
+  Wire.endTransmission();
+
+  // デバイスへ1byteのレジスタデータを要求する
+  Wire.requestFrom(DEVICE_ADDRESS, 1);
+
+  while (Wire.available() == 0)
+  {
+  }
+  uint8_t test = Wire.read();
+
+  if (0xBD != test)
+  {
+    Serial.println("レジスタの値が正常に取得できません。");
+    return;
+  }
+  WHO_AM_I = true;
+
+  // CTRL_REG1(制御レジスタ1)
+  Wire.beginTransmission(DEVICE_ADDRESS);
+  // CTRL_REG1のアドレス
+  Wire.write(0x20);
+  // パワーダウンをオフにしてセンサー周期を1Hzにする
+  //   パワーダウン制御 : 1->Active mode
+  //   出力データレート : 0,0,1->1Hz(1秒1回)
+  //Wire.write(0x90); // 2進 10010000
+  Wire.write(0xC0); // 25Hzにまであげる
+  Wire.endTransmission();
 }
