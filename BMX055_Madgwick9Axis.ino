@@ -18,6 +18,7 @@
 #define Addr_Gyro 0x69  // (JP1,JP2,JP3 = Openの時)
 // BMX055　磁気センサのI2Cアドレス
 #define Addr_Mag 0x13   // (JP1,JP2,JP3 = Openの時)
+#define address 0x1E    //0011110b, I2C 7bit address of HMC5883
 
 // センサーの値を保存するグローバル関数
 float xAccl = 0.00;
@@ -79,7 +80,11 @@ void loop()
   Serial.print(zMag);
   Serial.println(""); 
 
-  filter.update(xGyro,yGyro,zGyro,xAccl,yAccl,zAccl,xMag,yMag,zMag);
+  
+
+
+  filter.update(xGyro, yGyro, zGyro, xAccl, yAccl, zAccl, xMag, yMag, zMag);
+  
   roll = filter.getRoll();
   pitch = filter.getPitch();
   heading = filter.getYaw();
