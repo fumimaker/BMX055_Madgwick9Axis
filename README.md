@@ -1,1 +1,3 @@
 # BMX055_Madgwick9Axis
+BMX055をArduinoのMadgwickFiliterライブラリを通して姿勢推定してみるサンプルです。  
+MadgwickはKalmanFilterより軽いらしいので性能測定してみたい。
